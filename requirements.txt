@@ -1,0 +1,19 @@
+tensorflow
+keras
+flask
+opencv-python
+flask
+numpy
+pillow
+flask_cors
+pandas
+numpy
+scikit-learn
+matplotlib
+
+# conda install pytorch torchvision torchaudio pytorch-cuda=12.1 -c pytorch -c nvidia
+pytorch
+# pytorch-cuda=12.1
+torchvision 
+torchaudio
+fastai
