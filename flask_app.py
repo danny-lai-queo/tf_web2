@@ -1,5 +1,5 @@
 from flask import Flask, render_template, request
-#from keras.preprocessing.image import img_to_array
+# from keras.preprocessing.image import img_to_array
 from keras.utils import img_to_array
 from keras.models import load_model
 import cv2
@@ -17,58 +17,9 @@ import os
 from PIL import Image
 import re
 
-#names = ["daisy", "dandelon", "roses", "sunflowers", "tulips"]
-class_names = ['daisy', 'dandelion', 'roses', 'sunflowers', 'tulips']
+# from imglib import processImg   # for keras and tensorflow
 
-
-
-# Process image and predict label
-def processImg(img_path):
-    img_height = 180
-    img_width = 180
-    img = tf.keras.utils.load_img(img_path, target_size=(img_height, img_width))
-
-    img_array = tf.keras.utils.img_to_array(img)
-    img_array = tf.expand_dims(img_array, 0) # Create a batch
-
-    my_dir = os.path.dirname(__file__)
-    print(f"my_dir == {my_dir} >>>>>>>>>>>>>>>>>>>>>>>")
-    m_name = os.path.join(my_dir, 'model.tflite')
-    # TF_MODEL_FILE_PATH = 'model.tflite' # The default path to the saved TensorFlow Lite model
-    TF_MODEL_FILE_PATH = m_name
-    interpreter = tf.lite.Interpreter(model_path=TF_MODEL_FILE_PATH)
-    sig_dict = interpreter.get_signature_list()
-    print(f"sig_dict = {sig_dict}")
-    sig = list(sig_dict)[0]
-    print(f'sig = {sig}')
-    classify_lite = interpreter.get_signature_runner('serving_default')
-    print(classify_lite)
-    predictions_lite = classify_lite(sequential_1_input=img_array)['outputs']
-    score_lite = tf.nn.softmax(predictions_lite)
-    label_name = class_names[np.argmax(score_lite)]
-    confidence_percent = 100 * np.max(score_lite)
-    print("This image most likely belongs to {} with a {:.2f} percent confidence.".format(label_name, confidence_percent))
-
-    return label_name, confidence_percent
-
-def processImg_old(IMG_PATH):
-    # Read image
-    model = load_model("flower.model")
-
-    # Preprocess image
-    image = cv2.imread(IMG_PATH)
-    image = cv2.resize(image, (199, 199))
-    image = image.astype("float") / 255.0
-    image = img_to_array(image)
-    image = np.expand_dims(image, axis=0)
-
-    res = model.predict(image)
-    label = np.argmax(res)
-    print("Label", label)
-    labelName = class_names[label]
-    print("Label name:", labelName)
-    return labelName
-
+from imglib_fastai import processImg  # for fastai
 
 # Initializing flask application
 app = Flask(__name__)
@@ -108,7 +59,7 @@ def processRequest():
                     with open(new_filepath, "wb") as binary_file:
                         # Write bytes to file
                         binary_file.write(decodedBytes)
-
+                    
                     if imgType == 'png':
                         print("convert png to jpg")
                         im = Image.open(new_filepath)
@@ -126,14 +77,14 @@ def processRequest():
 
                     #return flower_name
                     return render_template("response.html", flower_name=flower_name, confidence_percent_str=confidence_percent_str, img_base64_str=imgBase64)
-
+            
             print("resopnse file error.")
-            return render_template("error.html", error_message="File Processing Error")
+            return render_template("error.html", error_message="File Processing Error", details="")
     except Exception as ex:
         print("ERROR: ", ex)
-        return render_template("error.html", error_message="Server Error")
+        return render_template("error.html", error_message="Server Error", details="{ex}")
 
-
+                
 
 
     return render_template("index.html")
@@ -156,8 +107,6 @@ def processRequest_old():
 
     #return flower_name
     return render_template("response.html", flower_name=flower_name, confidence_percent_str=confidence_percent_str, img_base64_str=encoded_string)
-
-
 
 
 
